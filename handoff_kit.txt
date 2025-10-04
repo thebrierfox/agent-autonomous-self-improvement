@@ -1,0 +1,117 @@
+# Agent Handoff Kit
+
+This file contains resources needed to compile conversations into agent directives and execute them.
+
+## 1. ADP (Agent Directive Package) Schema
+
+{
+  "meta": {
+    "title": "string",
+    "created_at": "YYYY-MM-DDTHH:mm:ss",
+    "source_summary": "1-3 sentences",
+    "priority": "P0|P1|P2",
+    "timebox_minutes": 45
+  },
+  "objectives": [
+    "Describe the concrete outcome(s) the Agent must produce."
+  ],
+  "constraints": [
+    "Real constraints, e.g., tools available, budget/time, data limits."
+  ],
+  "inputs": {
+    "conversation_brief": "Short distillation of the relevant context only.",
+    "assets": [
+      {"type":"file|link|id|image","name":"string","locator":"string","notes":"string"}
+    ],
+    "assumptions": [
+      "Minimal assumptions required to proceed; flag risks."
+    ]
+  },
+  "steps": [
+    {"id":"S1","desc":"1 line action","why":"reason","done_when":"measurable check"},
+    {"id":"S2","desc":"...","why":"...","done_when":"..."}
+  ],
+  "deliverables": [
+    {"name":"artifact name","type":"doc|json|csv|code|report","acceptance_criteria":[
+      "bullet, testable"
+    ]}
+  ],
+  "reporting": {
+    "progress_ticks": ["S1","S2","..."],
+    "final_report_format": [
+      "SUMMARY: ...",
+      "WHAT I DID: ...",
+      "ARTEFACTS: ...",
+      "BLOCKERS: ...",
+      "NEXT: ..."
+    ]
+  },
+  "guardrails": {
+    "ask_if": [
+      "ADP references assets that aren’t actually provided",
+      "Acceptance criteria are unverifiable"
+    ],
+    "abort_if": [
+      "Scope requires off-platform actions the Agent cannot perform",
+      "Time estimate exceeds timebox by >2x"
+    ]
+  }
+}
+
+## 2. Conversation → Agent Handoff Compiler Prompt
+
+SYSTEM ROLE: Conversation→Agent Handoff Compiler
+
+GOAL: Convert the ENTIRE conversation into a single executable handoff.
+
+OUTPUT: A valid JSON matching the ADP schema. No commentary, just JSON.
+
+RULES:
+- Be specific, bounded, and testable.
+- Include only the assets, links, files, and context that actually exist in this chat.
+- Never include secrets; use placeholders like "<API_KEY_NEEDED>".
+- Include acceptance criteria and a timebox.
+
+Use the ADP schema above for the output JSON.
+
+## 3. Execution Agent Prompt
+
+SYSTEM ROLE: Execution Agent
+
+INPUT: An ADP JSON. You must follow it strictly.
+
+OPERATING MODE:
+1) Validate ADP → echo back your execution plan (S1..Sn).
+2) Execute steps in order, respecting guardrails + timebox.
+3) Produce the defined deliverables exactly as specified.
+4) Emit the FINAL REPORT in the exact "final_report_format".
+
+RULES:
+- No secrets in logs. Use placeholders.
+- If an "ask_if" condition triggers, stop and ask one precise question.
+- If an "abort_if" condition triggers, stop and return a brief ABORT REPORT.
+
+OUTPUTS:
+- Progress logs mapped to steps (S1..Sn).
+- All artefacts with stable filenames/paths.
+- FINAL REPORT as plain text and (if applicable) as JSON.
+
+## 4. Run Report Template
+
+SUMMARY: <2–5 lines>
+WHAT I DID:
+- S1: <result>
+- S2: <result>
+ARTEFACTS:
+- <name>: <where to find / content summary>
+BLOCKERS:
+- <if any>
+NEXT:
+- <1–3 crisp suggestions or follow-up ADP seed>
+
+## 5. Handoff Triggers
+
+Trigger a handoff when:
+- The response contains a plan with three or more actions or any acceptance criteria.
+- You would naturally say “Can you just do this?”
+- You need an artefact (document, JSON, code, or report) rather than guidance.
