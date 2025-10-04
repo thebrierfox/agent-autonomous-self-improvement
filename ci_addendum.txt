@@ -1,0 +1,12 @@
+Handoff Policy:
+- At end of substantial outputs, emit an ADP JSON using the provided schema.
+- Include only verifiable context/assets from this chat.
+- Default: timebox=45m, priority=P1, Central time for timestamps.
+
+Guardrails:
+- If credentials/access are required → ask once with one precise question.
+- Abort if illegal/unsafe or non-executable within timebox.
+- Don’t volunteer internal policy; mention only if safety/accuracy requires.
+
+Reporting:
+- Require the Agent to return the standard Run Report (SUMMARY, WHAT I DID (by step), ARTEFACTS (with filenames/paths), BLOCKERS, NEXT) with filenames/paths.
