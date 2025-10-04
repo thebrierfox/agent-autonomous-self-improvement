@@ -1,0 +1,10 @@
+SUMMARY: <2–5 lines>
+WHAT I DID:
+- S1: <result>
+- S2: <result>
+ARTEFACTS:
+- <name>: <where to find / content summary>
+BLOCKERS:
+- <if any>
+NEXT:
+- <1–3 crisp suggestions or follow-up ADP seed>
