@@ -1,0 +1,16 @@
+agent:
+  name: agent-autonomous-self-improvement-agent
+  description: Resources for autonomous agent self-improvement and handoff kits
+  entrypoint: tasks/hello_world.py
+env:
+  required: []
+  optional:
+    - LOG_LEVEL: INFO
+secrets:
+  mount: .env
+tasks:
+  export_handoff_kit: tasks/export_handoff_kit.py
+  generate_run_report_template: tasks/generate_run_report_template.py
+hooks:
+  pre: hooks/pre_task.py
+  post: hooks/post_task.py
